@@ -155,4 +155,16 @@ class GrizzlyBerTest < Minitest::Test
     assert_equal "AA", tlv.value[0].value
     assert_equal "55", tlv.value[1].value
   end
+
+    def test_decode_array_of_2children
+    tlv_array = GrizzlyBer.decode_all_hex("5A01AA570155")
+    assert_kind_of Array, tlv_array
+    assert_equal 2, tlv_array.size
+    assert_kind_of GrizzlyBer, tlv_array[0]
+    assert_kind_of GrizzlyBer, tlv_array[1]
+    assert_equal 0x5A, tlv_array[0].tag
+    assert_equal 0x57, tlv_array[1].tag
+    assert_equal "AA", tlv_array[0].value
+    assert_equal "55", tlv_array[1].value
+  end
 end

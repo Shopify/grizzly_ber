@@ -35,6 +35,14 @@ class GrizzlyBer
     decode_byte_array(binary_string.unpack("C*"))
   end
 
+  def self.decode_all_hex(hex_string)
+    decode_all_binary([hex_string].pack("H*"))
+  end
+
+  def self.decode_all_binary(binary_string)
+    decode_all_byte_array(binary_string.unpack("C*"))
+  end
+
   def encode_hex
     encoded = ""
     encoded << @tag.to_s(16).upcase
@@ -125,6 +133,12 @@ class GrizzlyBer
     else
       @value = byte_array.shift(@length).pack("C*").unpack("H*").first.upcase
     end
+  end
+
+  def self.decode_all_byte_array(byte_array)
+    tlv_array = []
+    tlv_array << GrizzlyBer.new.instance_eval { decode_byte_array(byte_array) } while byte_array.size > 0
+    tlv_array
   end
 end
 
