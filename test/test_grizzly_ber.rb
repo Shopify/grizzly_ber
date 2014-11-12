@@ -131,4 +131,28 @@ class GrizzlyBerTest < Minitest::Test
     tlv = GrizzlyBer.new("E4065A01AA570155")
     assert_equal "5A01AA570155", tlv.encode_only_values
   end
+
+  def test_decode_corrupt_length
+    tlv = GrizzlyBer.new("5A825A")
+    assert_nil tlv.value
+    tlv = GrizzlyBer.new("5A815A")
+    assert_nil tlv.value
+    tlv = GrizzlyBer.new("5A025A")
+    assert_nil tlv.value
+  end
+
+  def test_discard_leading_scratch_bytes
+    tlv = GrizzlyBer.new("00FF5A015A")
+    assert_equal 0x5a, tlv.tag
+    assert_equal "5A", tlv.value
+    tlv = GrizzlyBer.new("E409FF5A01AA0000570155")
+    assert_kind_of Array, tlv.value
+    assert_equal 2, tlv.value.size
+    assert_kind_of GrizzlyBer, tlv.value[0]
+    assert_kind_of GrizzlyBer, tlv.value[1]
+    assert_equal 0x5A, tlv.value[0].tag
+    assert_equal 0x57, tlv.value[1].tag
+    assert_equal "AA", tlv.value[0].value
+    assert_equal "55", tlv.value[1].value
+  end
 end
