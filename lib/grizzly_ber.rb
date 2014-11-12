@@ -27,23 +27,6 @@ class GrizzlyBer
     @value = [] if isConstruct? and @value.nil?
   end
 
-  def length
-    return value.length/2 if value.is_a? String
-    value.inject(0) {|length, tlv| length += tlv.length_of_tag + tlv.length_of_length + tlv.length}
-  end
-
-  def length_of_tag
-    [@tag.to_s(16)].pack("H*").unpack("C*").count
-  end
-
-  def length_of_length
-    if length < 0x7F
-      1
-    else
-      1+[length.to_s(16)].pack("H*").unpack("C*").count
-    end
-  end
-
   def decode_hex(hex_string)
     decode_binary([hex_string].pack("H*"))
   end
@@ -52,12 +35,47 @@ class GrizzlyBer
     decode_byte_array(binary_string.unpack("C*"))
   end
 
+  def encode_hex
+    encoded = ""
+    encoded << @tag.to_s(16).upcase
+    if length_of_length == 1
+      encoded << length.to_s(16).rjust(2,'0').upcase
+    else
+      encoded << ((length_of_length-1) | 0x80).to_s(16).rjust(2,'0').upcase
+      encoded << length.to_s(16).rjust((length_of_length-1)*2,'0').upcase
+    end
+    encoded << encode_only_values
+  end
+
+  def encode_only_values
+    if @value.is_a? String
+      @value.upcase
+    else
+      @value.inject("") {|encoded_children,child| encoded_children << child.encode_hex}
+    end
+  end
+
+  protected
+
+  def length
+    return value.length/2 if value.is_a? String #because hex strings are 2 chars per byte
+    value.inject(0) {|length, tlv| length += tlv.length_of_tag + tlv.length_of_length + tlv.length}
+  end
+
+  def length_of_tag
+    [@tag.to_s(16)].pack("H*").unpack("C*").count
+  end
+
+  def length_of_length
+    1 + ((length < 0x7F) ? 0 : [length.to_s(16)].pack("H*").unpack("C*").count)
+  end
+
   def decode_byte_array(byte_array)
-    byte_array = decode_tag(byte_array)
-    byte_array = decode_length(byte_array)
-    byte_array = decode_value(byte_array)
+    decode_value decode_length decode_tag byte_array
     self
   end
+
+  private
 
   def decode_tag(byte_array)
     byte_array.shift while byte_array.size > 0 and (byte_array[0] == 0x00 or byte_array[0] == 0xFF)
@@ -94,42 +112,18 @@ class GrizzlyBer
     byte_array
   end
 
-  def tag_msb
-    [@tag.to_s(16)].pack("H*").unpack("C*").first
-  end
-
   def isConstruct?
-    (tag_msb & 0x20) == 0x20
+    ([@tag.to_s(16)].pack("H*").unpack("C*").first & 0x20) == 0x20
   end
 
   def decode_value(byte_array)
     return [] if byte_array.size < 1 or byte_array.size < @length
     if isConstruct?
-      @value ||= []
+      @value = []
       children_bytes = byte_array.shift(@length)
       @value << GrizzlyBer.new.decode_byte_array(children_bytes) while children_bytes.size > 0
     else
       @value = byte_array.shift(@length).pack("C*").unpack("H*").first.upcase
-    end
-  end
-
-  def encode_hex
-    encoded = ""
-    encoded << @tag.to_s(16).upcase
-    if length_of_length == 1
-      encoded << length.to_s(16).rjust(2,'0').upcase
-    else
-      encoded << ((length_of_length-1) | 0x80).to_s(16).rjust(2,'0').upcase
-      encoded << length.to_s(16).rjust((length_of_length-1)*2,'0').upcase
-    end
-    encoded << encode_only_values
-  end
-
-  def encode_only_values
-    if @value.is_a? String
-      @value.upcase
-    else
-      @value.inject("") {|encoded_children,child| encoded_children << child.encode_hex}
     end
   end
 end

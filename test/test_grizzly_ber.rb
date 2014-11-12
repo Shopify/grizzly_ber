@@ -28,16 +28,16 @@ class GrizzlyBerTest < Minitest::Test
   end
 
   def test_decode_min_length
-    tlv = GrizzlyBer.new("5A015A")
-    assert_equal 0x01, tlv.length
+    tlv = GrizzlyBer.new("5A015AFFFF")
+    assert_equal "5A", tlv.value
   end
   def test_decode_2byte_length
-    tlv = GrizzlyBer.new("5A81015A")
-    assert_equal 0x01, tlv.length
+    tlv = GrizzlyBer.new("5A81015AFFFF")
+    assert_equal "5A", tlv.value
   end
   def test_decode_3byte_length
-    tlv = GrizzlyBer.new("5A8200015A")
-    assert_equal 0x01, tlv.length
+    tlv = GrizzlyBer.new("5A8200015AFF")
+    assert_equal "5A", tlv.value
   end
 
   def test_decode_min_value
@@ -57,7 +57,6 @@ class GrizzlyBerTest < Minitest::Test
     tlv = GrizzlyBer.new("E4035A01AA")
     assert_kind_of Array, tlv.value
     assert_equal 1, tlv.value.size
-    assert_equal 3, tlv.length
     assert_kind_of GrizzlyBer, tlv.value.first
     assert_equal 0x5A, tlv.value.first.tag
     assert_equal "AA", tlv.value.first.value
@@ -66,7 +65,6 @@ class GrizzlyBerTest < Minitest::Test
     tlv = GrizzlyBer.new("E4065A01AA570155")
     assert_kind_of Array, tlv.value
     assert_equal 2, tlv.value.size
-    assert_equal 6, tlv.length
     assert_kind_of GrizzlyBer, tlv.value[0]
     assert_kind_of GrizzlyBer, tlv.value[1]
     assert_equal 0x5A, tlv.value[0].tag
@@ -76,7 +74,6 @@ class GrizzlyBerTest < Minitest::Test
   end
   def test_decode_emv
     tlv = GrizzlyBer.new(TEST_EMV)
-    assert_equal 0x0130, tlv.length
     assert_kind_of Array, tlv.value
     assert_equal 35, tlv.value.size
     assert_equal TEST_EMV_TAGS, tlv.value.map {|tlv| tlv.tag}
