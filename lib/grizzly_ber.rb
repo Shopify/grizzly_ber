@@ -55,6 +55,10 @@ class GrizzlyBer
     encoded << encode_only_values
   end
 
+  def encode_binary
+    [encode_hex].pack("H*")
+  end
+
   def encode_only_values
     if @value.is_a? String
       @value.upcase
