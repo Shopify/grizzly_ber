@@ -27,6 +27,12 @@ class GrizzlyBer
     @value = [] if isConstruct? and @value.nil?
   end
 
+  def find(tag)
+    return self if @tag == tag
+    return nil unless isConstruct?
+    @value.find{|tlv| tlv.find(tag) != nil}
+  end
+
   def decode_hex(hex_string)
     decode_binary([hex_string].pack("H*"))
   end
