@@ -176,4 +176,12 @@ class GrizzlyBerTest < Minitest::Test
     assert_equal "5A015A", tlv.encode_hex
     assert_equal "\x5A\x01\x5A", tlv.encode_binary
   end
+
+  def test_find_tags
+    tlv = GrizzlyBer.new("E4065A01AA570155")
+    assert_equal tlv.find(0xe4), tlv
+    assert_equal tlv.find(0xdfae02), nil
+    assert_equal tlv.find(0x5a), tlv.value[0]
+    assert_equal tlv.find(0x57), tlv.value[1]
+  end
 end
