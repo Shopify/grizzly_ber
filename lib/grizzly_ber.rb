@@ -30,7 +30,7 @@ class GrizzlyBer
   end
 
   def find(tag_or_name)
-    if tag_or_name.class == String
+    if tag_or_name.is_a? String
       tag = GrizzlyTag.tag_from_name(tag_or_name)
     else
       tag = tag_or_name
@@ -85,19 +85,17 @@ class GrizzlyBer
     end
   end
 
-  def to_s(indent_size=0)
+  def to_s(indent_size: 0)
+    indent = " " * 3 * indent_size
     info = GrizzlyTag.tagged(@tag) || {:name => "Unknown Tag", :description => "Unknown"}
-    output  = "   "*indent_size + "#{@tag.to_s(16).upcase}: #{info[:name]}\n"
-    output += "   "*indent_size + " Description: #{info[:description]}\n"
+    output  = "#{indent}#{@tag.to_s(16).upcase}: #{info[:name]}\n"
+    output += "#{indent} Description: #{info[:description]}\n"
     if @value.is_a? Array
-      output += @value.reduce("") { |string, tlv| string += tlv.to_s(indent_size+1)}
+      output += @value.reduce("") { |string, tlv| string += tlv.to_s(indent_size: indent_size+1)}
     else
-      output += "   "*indent_size + " Value: "
-      if info[:format] == :string
-        output += "\"#{[@value].pack("H*")}\"\n"
-      else
-        output += "#{@value}\n"
-      end
+      output += "#{indent} Value: #{@value}"
+      output += ", \"#{[@value].pack("H*")}\"" if info[:format] == :string
+      output += "\n"
     end
     output
   end
