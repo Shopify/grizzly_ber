@@ -87,12 +87,12 @@ class GrizzlyBer
 
   def to_s(indent_size=0)
     info = GrizzlyTag.tagged(@tag) || {:name => "Unknown Tag", :description => "Unknown"}
-    output  = " "*indent_size + "#{@tag.to_s(16).upcase}: #{info[:name]}\n"
-    output += " "*indent_size + "Description: #{info[:description]}\n"
+    output  = "   "*indent_size + "#{@tag.to_s(16).upcase}: #{info[:name]}\n"
+    output += "   "*indent_size + " Description: #{info[:description]}\n"
     if @value.is_a? Array
       output += @value.reduce("") { |string, tlv| string += tlv.to_s(indent_size+1)}
     else
-      output += " "*indent_size + "Value: "
+      output += "   "*indent_size + " Value: "
       if info[:format] == :string
         output += "\"#{[@value].pack("H*")}\"\n"
       else
