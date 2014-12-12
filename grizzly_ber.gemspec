@@ -10,4 +10,5 @@ Gem::Specification.new do |s|
   s.homepage    = ''
   s.license     = 'MIT'
   s.files       = ["lib/grizzly_ber.rb", "lib/grizzly_tag.rb"]
+  s.required_ruby_version = '>= 2.0.0' #This gem uses some keyword args
 end
