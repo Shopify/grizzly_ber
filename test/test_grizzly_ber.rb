@@ -180,8 +180,42 @@ class GrizzlyBerTest < Minitest::Test
   def test_find_tags
     tlv = GrizzlyBer.new("E4065A01AA570155")
     assert_equal tlv.find(0xe4), tlv
-    assert_equal tlv.find(0xdfae02), nil
-    assert_equal tlv.find(0x5a), tlv.value[0]
-    assert_equal tlv.find(0x57), tlv.value[1]
+    assert_nil tlv.find(0xdfae02)
+    assert_nil tlv.find("")
+    assert_equal tlv.value[0], tlv.find(0x5a)
+    assert_equal tlv.value[0], tlv.find("Application Primary Account Number (PAN)")
+    assert_equal tlv.value[1], tlv.find(0x57)
+    assert_equal tlv.value[1], tlv.find("Track 2 Equivalent Data")
   end
+
+  def test_removing_tags
+    tlv = GrizzlyBer.new("E4065A01AA570155")
+    tlv_to_remove = tlv.value[0]
+    assert_equal 2, tlv.value.count
+    refute_nil tlv.find(0x5A)
+    refute_nil tlv.find(0x57)
+    assert_equal tlv_to_remove, tlv.remove!(0x5A)
+    assert_equal 1, tlv.value.count
+    assert_nil tlv.find(0x5A)
+    refute_nil tlv.find(0x57)
+    assert_equal "E403570155", tlv.encode_hex
+  end
+
+  def test_pretty_print
+    tlv = GrizzlyBer.new("E4035A01AA")
+    info = GrizzlyTag.tagged(0x5a)
+    refute_nil tlv.to_s["E4"]
+    refute_nil tlv.to_s["5A"]
+    refute_nil tlv.to_s[info[:name]]
+    refute_nil tlv.to_s[info[:description]]
+
+    tlv = GrizzlyBer.new "500B5649534120435245444954"
+    info = GrizzlyTag.tagged(0x50)
+    refute_nil tlv.to_s["50"]
+    refute_nil tlv.to_s[info[:name]]
+    refute_nil tlv.to_s[info[:description]]
+    refute_nil tlv.to_s["VISA CREDIT"]
+  end
+
+
 end
