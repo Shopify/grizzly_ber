@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name        = 'grizzly_ber'
-  s.version     = '0.0.3'
+  s.version     = '0.0.4'
   s.date        = '2014-11-11'
   s.summary     = "Fiercest TLV-BER parser"
   s.description = "CODEC for TLV-BER encoded strings."
@@ -9,4 +9,6 @@ Gem::Specification.new do |s|
   s.files       = ["lib/grizzly_ber.rb"]
   s.homepage    = ''
   s.license     = 'MIT'
+  s.files       = ["lib/grizzly_ber.rb", "lib/grizzly_tag.rb"]
+  s.required_ruby_version = '>= 2.0.0' #This gem uses some keyword args
 end

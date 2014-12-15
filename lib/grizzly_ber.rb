@@ -1,3 +1,5 @@
+require 'grizzly_tag'
+
 class GrizzlyBer
   attr_reader :value, :tag
 
@@ -27,10 +29,20 @@ class GrizzlyBer
     @value = [] if isConstruct? and @value.nil?
   end
 
-  def find(tag)
+  def find(tag_or_name)
+    if tag_or_name.is_a? String
+      tag = GrizzlyTag.tag_from_name(tag_or_name)
+    else
+      tag = tag_or_name
+    end
     return self if @tag == tag
     return nil unless isConstruct?
     @value.find{|tlv| tlv.find(tag) != nil}
+  end
+
+  def remove!(tag_or_name)
+    tag_to_remove = find(tag_or_name)
+    @value.delete tag_to_remove unless tag_to_remove.nil?
   end
 
   def decode_hex(hex_string)
@@ -71,6 +83,21 @@ class GrizzlyBer
     else
       @value.inject("") {|encoded_children,child| encoded_children << child.encode_hex}
     end
+  end
+
+  def to_s(indent_size: 0)
+    indent = " " * 3 * indent_size
+    info = GrizzlyTag.tagged(@tag) || {:name => "Unknown Tag", :description => "Unknown"}
+    output  = "#{indent}#{@tag.to_s(16).upcase}: #{info[:name]}\n"
+    output += "#{indent} Description: #{info[:description]}\n"
+    if @value.is_a? Array
+      output += @value.reduce("") { |string, tlv| string += tlv.to_s(indent_size: indent_size+1)}
+    else
+      output += "#{indent} Value: #{@value}"
+      output += ", \"#{[@value].pack("H*")}\"" if info[:format] == :string
+      output += "\n"
+    end
+    output
   end
 
   protected
