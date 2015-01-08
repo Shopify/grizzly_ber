@@ -12,7 +12,7 @@ tlv_string = "9F0206000000000612"
 OpenSSL::ASN1.decode([tlv_string].pack("H*")).to_der.unpack("H*").first.upcase
  => "8206000000000612" 
 
-GrizzlyBer.new(tlv_string).encode_hex
+GrizzlyBer.new(tlv_string).to_ber
  => "9F0206000000000612" 
 ```
 
@@ -36,27 +36,24 @@ Or install it yourself as:
     # Instantiate a TLV instance with a TLV-BER-encoded hex string to decode it
     tlv = GrizzlyBer.new("DFAE22015A")
 
-    # Access the tag as an integer
+    # Access a value by tag
+    tlv = GrizzlyBer.new
+    tlv["DFAE22"] #returns [0x5A]
+
+    # Set a value by tag
     tlv = GrizzlyBer.new
     tlv.tag = 0xDFAE22
+    tlv["DFAE22"] = [0xAA]
+    tlv.set_hex_value_for_tag("DFAE22", "AA")
 
-    # Access the value as a String for non-construct TLVs
+    # Created multi-dimensional structures
     tlv = GrizzlyBer.new
-    tlv.tag = 0xDFAE22
-    tlv.value = "5A"
-
-    # Access the value as an Array for construct TLVs
-    tlv = GrizzlyBer.new
-    tlv.tag = 0xE1
-    tlv.value << GrizzlyBer.new
-    tlv.value.last.tag = 0x5A
-    tlv.value.last.value = "AA1234"
-    tlv.value << GrizzlyBer.new
-    tlv.value.last.tag = 0x57
-    tlv.value.last.value = "55A55A"
+    tlv["E1"] = GrizzlyBer.new
+    tlv["E1"]["5A"] = [0xaa, 0x12, 0x34]
+    tlv["E1"].set_hex_value_for_tag("57", "55A55A")
 
     # Encode the TLV instance back out to a hex string
-    hex_string = tlv.encode_hex
+    hex_string = tlv.to_ber
   
 ## Contributing
 
