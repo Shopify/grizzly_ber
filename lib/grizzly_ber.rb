@@ -27,11 +27,11 @@ class GrizzlyBerElement
     value_hex_string = @value.to_ber if @value.is_a? GrizzlyBer
     value_byte_count = value_hex_string.size/2
     if value_byte_count < 0x7F # if the length of the value array is only one byte long and does not have its upper bit set
-      ber_array << (value_byte_count).to_s(16).rjust(2,'0').upcase
+      ber_array << byte_to_hex(value_byte_count)
     else
       #pack("w") was meant to do this length calc but doesn't work right...
       number_of_bytes_in_byte_count = ((value_byte_count).to_s(16).size/2.0).ceil
-      ber_array << (number_of_bytes_in_byte_count | 0x80).to_s(16).rjust(2,'0').upcase
+      ber_array << byte_to_hex(number_of_bytes_in_byte_count | 0x80)
       ber_array += (value_byte_count).to_s(16).rjust(number_of_bytes_in_byte_count*2,'0').upcase
     end
     ber_array += value_hex_string
@@ -39,17 +39,21 @@ class GrizzlyBerElement
 
   private
 
+  def byte_to_hex(byte)
+    byte.to_s(16).rjust(2,'0').upcase
+  end
+
   def decode_tag(byte_array)
     byte_array.shift while byte_array.size > 0 and (byte_array[0] == 0x00 or byte_array[0] == 0xFF)
     return [] if byte_array.size < 1
 
     first_byte = byte_array.shift
-    @tag << first_byte.to_s(16).rjust(2,'0').upcase
+    @tag << byte_to_hex(first_byte)
     return byte_array if (first_byte & 0x1F) != 0x1F
 
     while byte_array.size > 0
       next_byte = byte_array.shift
-      @tag << next_byte.to_s(16).rjust(2,'0').upcase
+      @tag << byte_to_hex(next_byte)
       return byte_array if (next_byte & 0x80) != 0x80
     end
 
