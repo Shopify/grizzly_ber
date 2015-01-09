@@ -168,20 +168,18 @@ class GrizzlyBer
 
   def to_s(indent_size: 0)
     indent = " " * 3 * indent_size
-    output = ""
-    @elements.each do |element| 
+    @elements.reduce("") do |output, element| 
       info = GrizzlyTag.tagged(element.tag) || {:name => "Unknown Tag", :description => "Unknown"}
-      output  = "#{indent}#{element.tag}: #{info[:name]}\n"
+      output += "#{indent}#{element.tag}: #{info[:name]}\n"
       output += "#{indent} Description: #{info[:description]}\n"
       if element.value.is_a? GrizzlyBer
-        output += element.value.reduce("") { |string, tlv| string += element.value.to_s(indent_size: indent_size+1)}
+        output += element.value.to_s(indent_size: indent_size+1)
       else
         output += "#{indent} Value: #{element.value.pack("C*").unpack("H*").first}"
         output += ", \"#{element.value.pack("C*")}\"" if info[:format] == :string
         output += "\n"
       end
     end
-    output
   end
 
   private
