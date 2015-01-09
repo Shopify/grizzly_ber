@@ -3,7 +3,6 @@
 This library implements a TLV-BER parser, used for processing EMV transaction-related data.
 
 This works differently from OpenSSL::ASN1 in that it does not decode tags (EMV-style). The reason that this is importand can be seen when processing a long tag like 9F02 (Amount Authorized in EMV). OpenSSL will write it as the TLV-DER tag 82. GrizzlyBer maintains the original TLV-BER tag 9F02.
-GrizzlyBer also handles both hex and binary strings cleanly. :)
 
 ```ruby
 tlv_string = "9F0206000000000612"
@@ -46,7 +45,7 @@ Or install it yourself as:
     tlv["DFAE22"] = [0xAA]
     tlv.set_hex_value_for_tag("DFAE22", "AA")
 
-    # Created multi-dimensional structures
+    # Create multi-dimensional structures
     tlv = GrizzlyBer.new
     tlv["E1"] = GrizzlyBer.new
     tlv["E1"]["5A"] = [0xaa, 0x12, 0x34]

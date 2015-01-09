@@ -4,8 +4,8 @@ class GrizzlyBerElement
   attr_reader :tag, :value
 
   def initialize(byte_array = [])
-    @tag = "" # type is an uppercase hex string
-    @value = nil # type is a byte array if this is a data element or a GrizzlyBer if it's a sequence element
+    @tag = "" # is an uppercase hex string
+    @value = nil # is a byte array if this is a data element or a GrizzlyBer if it's a sequence element
     decode_value decode_length decode_tag byte_array
   end
 
@@ -17,24 +17,24 @@ class GrizzlyBerElement
   end
 
   def value=(value)
-    @value = value if value.is_a? Array
-    @value = value if value.is_a? GrizzlyBer
+    @value = value if value.is_a? Array or value.is_a? GrizzlyBer
   end
 
   def to_ber
     ber_array = ""
     ber_array += @tag.upcase
-    value_bytes = @value.pack("C*").unpack("H*").first.upcase if @value.is_a? Array
-    value_bytes = @value.to_ber if @value.is_a? GrizzlyBer
-    if value_bytes.size/2 < 0x7F
-      ber_array << (value_bytes.size/2).to_s(16).rjust(2,'0').upcase
+    value_hex_string = @value.pack("C*").unpack("H*").first.upcase if @value.is_a? Array
+    value_hex_string = @value.to_ber if @value.is_a? GrizzlyBer
+    value_byte_count = value_hex_string.size/2
+    if value_byte_count < 0x7F # if the length of the value array is only one byte long and does not have its upper bit set
+      ber_array << (value_byte_count).to_s(16).rjust(2,'0').upcase
     else
       #pack("w") was meant to do this length calc but doesn't work right...
-      number_of_bytes_in_length = ((value_bytes.size/2).to_s(16).size/2.0).ceil
-      ber_array << (number_of_bytes_in_length | 0x80).to_s(16).rjust(2,'0').upcase
-      ber_array += (value_bytes.size/2).to_s(16).rjust(number_of_bytes_in_length*2,'0').upcase
+      number_of_bytes_in_byte_count = ((value_byte_count).to_s(16).size/2.0).ceil
+      ber_array << (number_of_bytes_in_byte_count | 0x80).to_s(16).rjust(2,'0').upcase
+      ber_array += (value_byte_count).to_s(16).rjust(number_of_bytes_in_byte_count*2,'0').upcase
     end
-    ber_array += value_bytes
+    ber_array += value_hex_string
   end
 
   private
@@ -85,7 +85,7 @@ class GrizzlyBer
   include Enumerable
 
   def initialize(hex_string = "")
-    @elements = [] # type is an array of GrizzlyBerElement
+    @elements = [] # is an array of GrizzlyBerElement
     from_ber_hex_string(hex_string)
   end
 
@@ -162,7 +162,7 @@ class GrizzlyBer
   def to_s(indent_size: 0)
     indent = " " * 3 * indent_size
     output = ""
-    @elements.each { |element| 
+    @elements.each do |element| 
       info = GrizzlyTag.tagged(element.tag) || {:name => "Unknown Tag", :description => "Unknown"}
       output  = "#{indent}#{element.tag}: #{info[:name]}\n"
       output += "#{indent} Description: #{info[:description]}\n"
@@ -173,7 +173,7 @@ class GrizzlyBer
         output += ", \"#{element.value.pack("C*")}\"" if info[:format] == :string
         output += "\n"
       end
-    }
+    end
     output
   end
 
