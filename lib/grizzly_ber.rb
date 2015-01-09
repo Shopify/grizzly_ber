@@ -4,20 +4,20 @@ class GrizzlyBerElement
   attr_reader :tag, :value
 
   def initialize(byte_array = [])
+    raise ArgumentError, "byte_array must be of type Array" unless byte_array.is_a?(Array)
     @tag = "" # is an uppercase hex string
     @value = nil # is a byte array if this is a data element or a GrizzlyBer if it's a sequence element
     decode_value decode_length decode_tag byte_array
   end
 
   def tag=(tag)
-    return nil unless tag.is_a? String
-    return nil unless tag.size.even?
-    return nil unless tag =~ /^[0-9A-F]*$/
+    raise ArgumentError, "tag must be a valid hex string" unless tag.is_a? String and tag.size.even? and tag =~ /^[0-9A-F]*$/
     @tag = tag
   end
 
   def value=(value)
-    @value = value if value.is_a? Array or value.is_a? GrizzlyBer
+    raise ArgumentError, "value must be of type Array or GrizzlyBer" unless value.is_a?(Array) || value.is_a?(GrizzlyBer)
+    @value = value 
   end
 
   def to_ber
@@ -89,15 +89,18 @@ class GrizzlyBer
   include Enumerable
 
   def initialize(hex_string = "")
+    raise ArgumentError, "hex_string must be a valid hex string" unless hex_string.is_a? String and hex_string.size.even? and hex_string =~ /^[0-9A-F]*$/
     @elements = [] # is an array of GrizzlyBerElement
     from_ber_hex_string(hex_string)
   end
 
   def from_ber_hex_string(hex_string)
+    raise ArgumentError, "hex_string must be a valid hex string" unless hex_string.is_a? String and hex_string.size.even? and hex_string =~ /^[0-9A-F]*$/
     self.from_ber [hex_string].pack("H*").unpack("C*")
   end
 
   def from_ber(byte_array)
+    raise ArgumentError, "byte_array must be an array of bytes" unless byte_array.is_a? Array and byte_array.all? {|byte| byte.is_a? Integer and byte <= 0xFF}
     while byte_array.size > 0
       element = GrizzlyBerElement.new(byte_array)
       return nil if element.tag.nil?
