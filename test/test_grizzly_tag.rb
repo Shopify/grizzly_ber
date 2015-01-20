@@ -1,6 +1,7 @@
 require 'minitest/autorun'
 require 'bundler/setup'
 require 'grizzly_tag'
+require 'grizzly_ber'
 require 'byebug'
 
 class GrizzlyTagTest < Minitest::Test  
@@ -38,5 +39,10 @@ class GrizzlyTagTest < Minitest::Test
     assert_nil GrizzlyTag.tag_from_name("")
     assert_equal GrizzlyTag.tag_from_name("Transaction Time"), "9F21"
     assert_equal GrizzlyTag.tag_from_name("Application Primary Account Number (PAN)"), "5A"
+  end
+
+  def test_all_tags_are_valid
+    tlv = GrizzlyBer.new
+    GrizzlyTag.all.each{|hash| tlv[hash[:tag]] = [0]} #an argument error is raised if any tags are invalid
   end
 end

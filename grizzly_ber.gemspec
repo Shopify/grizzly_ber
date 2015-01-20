@@ -1,7 +1,7 @@
 Gem::Specification.new do |s|
   s.name        = 'grizzly_ber'
-  s.version     = '1.0.1'
-  s.date        = '2014-11-11'
+  s.version     = '1.0.2'
+  s.date        = '2015-01-20'
   s.summary     = "Fiercest TLV-BER parser"
   s.description = "CODEC for EMV TLV-BER encoded strings."
   s.authors     = ["Ryan Balsdon"]
