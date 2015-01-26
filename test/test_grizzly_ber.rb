@@ -198,4 +198,29 @@ class GrizzlyBerTest < Minitest::Test
     refute_nil tlv.to_s[info[:description]]
     refute_nil tlv.to_s["VISA CREDIT"]
   end
+
+  def test_add_extra_string
+    tlv = GrizzlyBer.new("5A01AA")
+    tlv.from_ber_hex_string("570155")
+    assert_equal 2, tlv.size
+    refute_nil tlv["5A"]
+    refute_nil tlv["57"]
+    assert_equal [0xAA], tlv["5A"]
+    assert_equal [0x55], tlv["57"]
+  end
+
+  def test_null_tags_are_bad
+    tlv = GrizzlyBer.new
+    assert_raises ArgumentError do
+      tlv["FFFF"] = [5]
+      tlv["1F808080"] = [0]
+      tlv["0100"] = [0]
+    end
+
+    #these tags are valid so won't raise errors
+    tlv["1F808000"] = [5]
+    tlv["01"] = [0]
+    tlv["1f00"] = [0]
+  end
+
 end

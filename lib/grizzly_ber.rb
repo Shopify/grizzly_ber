@@ -12,6 +12,7 @@ class GrizzlyBerElement
 
   def tag=(tag)
     raise ArgumentError, "tag must be a valid hex string" unless tag.is_a? String and tag.size.even? and tag =~ /^[0-9A-F]*$/
+    raise ArgumentError, "tag #{tag} must be a valid BER tag" unless tag_is_valid? tag
     @tag = tag
   end
 
@@ -38,6 +39,20 @@ class GrizzlyBerElement
   end
 
   private
+
+  def tag_is_valid?(tag_string)
+    tag_byte_array = [tag_string].pack("H*").unpack("C*")
+    return false if tag_byte_array.size < 1
+
+    first_byte = tag_byte_array.shift
+    return false if tag_byte_array.size > 0 and (first_byte & 0x1F) != 0x1F 
+
+    last_byte = tag_byte_array.pop || 0x00
+    return false if (last_byte & 0x80) != 0x00
+
+    tag_byte_array.each {|byte| return false if (byte & 0x80) != 0x80 }
+    true
+  end
 
   def byte_to_hex(byte)
     byte.to_s(16).rjust(2,'0').upcase
