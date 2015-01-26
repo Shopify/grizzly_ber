@@ -160,12 +160,11 @@ class GrizzlyBer
   end
 
   def set_value_for_tag(tag, value)
-    tag.upcase!
-    first_tagged_element = @elements.find {|element| tag == element.tag}
-    first_tagged_element ||= @elements.find {|element| element.tag == GrizzlyTag.named(tag)[:tag]} if GrizzlyTag.named(tag)
+    real_tag = GrizzlyTag.named(tag) ? GrizzlyTag.named(tag)[:tag] : tag.upcase
+    first_tagged_element = @elements.find {|element| real_tag == element.tag}
     if first_tagged_element.nil?
       first_tagged_element = GrizzlyBerElement.new
-      first_tagged_element.tag = tag
+      first_tagged_element.tag = real_tag
       @elements << first_tagged_element
     end
     first_tagged_element.value = value
