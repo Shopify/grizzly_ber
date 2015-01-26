@@ -171,6 +171,13 @@ class GrizzlyBerTest < Minitest::Test
     refute_nil tlv["E4"].value_of_first_element_with_tag("Track 2 Equivalent Data") #tag 57
   end
 
+  def test_add_tag_by_name
+    tlv = GrizzlyBer.new
+    tlv["Authorisation Response Code"] = [0x30, 0x30]
+    assert_equal [0x30, 0x30], tlv["Authorisation Response Code"]
+    assert_equal [0x30, 0x30], tlv["8A"]
+  end
+
   def test_removing_tags
     tlv = GrizzlyBer.new("E4065A01AA570155")
     assert_equal 2, tlv["E4"].size

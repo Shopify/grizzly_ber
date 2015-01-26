@@ -32,27 +32,47 @@ Or install it yourself as:
 
 ## Usage
 
-    # Instantiate a TLV instance with a TLV-BER-encoded hex string to decode it
+Instantiate a TLV instance with a TLV-BER-encoded hex string to decode it
+
     tlv = GrizzlyBer.new("DFAE22015A")
 
-    # Access a value by tag
+Access a value by tag
+
     tlv = GrizzlyBer.new
     tlv["DFAE22"] #returns [0x5A]
 
-    # Set a value by tag
+Set a value by tag
+
     tlv = GrizzlyBer.new
     tlv.tag = 0xDFAE22
     tlv["DFAE22"] = [0xAA]
     tlv.set_hex_value_for_tag("DFAE22", "AA")
 
-    # Create multi-dimensional structures
+Create multi-dimensional structures
+
     tlv = GrizzlyBer.new
     tlv["E1"] = GrizzlyBer.new
     tlv["E1"]["5A"] = [0xaa, 0x12, 0x34]
     tlv["E1"].set_hex_value_for_tag("57", "55A55A")
 
-    # Encode the TLV instance back out to a hex string
+Encode the TLV instance back out to a hex string
+
+    tlv = GrizzlyBer.new("DFAE22015A")
     hex_string = tlv.to_ber
+
+Access EMV-specific values by name
+
+    tlv = GrizzlyBer.new
+    tlv["8A"] = [0x30, 0x30]
+    tlv["Authorisation Response Code"] = [0x30, 0x30]
+
+Pretty-print EMV-specific data
+
+    puts GrizzlyBer.new "500B5649534120435245444954"
+    #50: Application Label
+    # Description: Mnemonic associated with the AID according to ISO/IEC 7816-5
+    # Value: 5649534120435245444954, "VISA CREDIT"
+
   
 ## Contributing
 
