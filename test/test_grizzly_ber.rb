@@ -1,7 +1,6 @@
 require 'minitest/autorun'
 require 'bundler/setup'
 require 'grizzly_ber'
-require 'byebug'
 
 class GrizzlyBerTest < Minitest::Test
   TEST_EMV = "E4820130500B564953412043524544495457114761739001010119D151220117589893895A0847617390010101195F201A564953412"\
