@@ -1,7 +1,6 @@
 require 'minitest/autorun'
 require 'bundler/setup'
 require 'grizzly_ber'
-require 'byebug'
 
 class GrizzlyBerTest < Minitest::Test
   TEST_EMV = "E4820130500B564953412043524544495457114761739001010119D151220117589893895A0847617390010101195F201A564953412"\
@@ -228,6 +227,14 @@ class GrizzlyBerTest < Minitest::Test
     tlv["1F808000"] = [5]
     tlv["01"] = [0]
     tlv["1f00"] = [0]
+  end
+
+  def test_cyrillic_application_name_doesnt_crash
+    tlv = GrizzlyBer.new "9F0608A0000000031010048408A0000000031010049F1C08313030303332373"\
+              "89F1E0831303030333237389F120CB2D8E1D020B4D5D1D5E22032500C56495341204445424"\
+              "95420329F34031E0300950502000080009B02E8009F100706010A03A000009F3303E0B8C88"\
+              "2025C009F0902008C9A03150317139593"
+    tlv.to_s
   end
 
 end

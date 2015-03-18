@@ -2,7 +2,6 @@ require 'minitest/autorun'
 require 'bundler/setup'
 require 'grizzly_tag'
 require 'grizzly_ber'
-require 'byebug'
 
 class GrizzlyTagTest < Minitest::Test  
 

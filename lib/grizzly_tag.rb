@@ -42,7 +42,7 @@ module GrizzlyTag
     new_tag(:tag => "9F06", :name => "Application Identifier (AID) – terminal", :description => "Identifies the application as described in ISO/IEC 7816-5"),
     new_tag(:tag => "82",   :name => "Application Interchange Profile", :description => "Indicates the capabilities of the card to support specific functions in the application"),
     new_tag(:tag => "50",   :name => "Application Label", :format => :string, :description => "Mnemonic associated with the AID according to ISO/IEC 7816-5"),
-    new_tag(:tag => "9F12", :name => "Application Preferred Name", :format => :string, :description => "Preferred mnemonic associated with the AID"),
+    new_tag(:tag => "9F12", :name => "Application Preferred Name", :description => "Preferred mnemonic associated with the AID"), #Note: This makes use of ISO 8859 additions to ASCII. Not using string format because we need to look at another tag to know which code table to use.
     new_tag(:tag => "5A",   :name => "Application Primary Account Number (PAN)", :description => "Valid cardholder account number"),
     new_tag(:tag => "5F34", :name => "Application Primary Account Number (PAN) Sequence Number", :description => "Identifies and differentiates cards with the same PAN"),
     new_tag(:tag => "87",   :name => "Application Priority Indicator", :description => "Indicates the priority of a given application or group of applications in a directory"),
