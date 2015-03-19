@@ -144,5 +144,6 @@ module GrizzlyTag
     new_tag(:tag => "9C",   :name => "Transaction Type", :description => "Indicates the type of financial transaction, represented by the first two digits of the ISO 8583:1987 Processing Code. The actual values to be used for the Transaction Type data element are defined by the relevant payment system"),
     new_tag(:tag => "9F37", :name => "Unpredictable Number", :description => "Value to provide variability and uniqueness to the generation of a cryptogram"),
     new_tag(:tag => "9F23", :name => "Upper Consecutive Offline Limit", :description => "Issuer-specified preference for the maximum number of consecutive offline transactions for this ICC application allowed in a terminal without online capability"),
+    new_tag(:tag => "9F5B", :name => "Issuer Script Results", :description => "Indicates the results of Issuer Script processing. When the reader/terminal transmits this data element to the acquirer, in this version of Kernel 3, it is acceptable that only byte 1 is transmitted, although it is preferable for all five bytes to be transmitted."),
   ]
 end
