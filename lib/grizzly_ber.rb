@@ -190,7 +190,10 @@ class GrizzlyBer
         output += element.value.to_s(indent_size: indent_size+1)
       else
         output += "#{indent} Value: #{element.value.pack("C*").unpack("H*").first}"
-        output += ", \"#{element.value.pack("C*")}\"" if info[:format] == :string
+        if info[:format] == :string
+          string_value = ", \"#{element.value.pack("C*")}\""
+          output += string_value if string_value.encoding == output.encoding #output is expected to be Encoding::UTF_8 but that default mustn't be forced here.
+        end
         output += "\n"
       end
     end
