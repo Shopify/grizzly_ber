@@ -207,7 +207,7 @@ class GrizzlyBerTest < Minitest::Test
 
   def test_add_extra_string
     tlv = GrizzlyBer.new("5A01AA")
-    tlv.from_ber_hex_string("570155")
+    refute_nil tlv.from_ber_hex_string("570155")
     assert_equal 2, tlv.size
     refute_nil tlv["5A"]
     refute_nil tlv["57"]
@@ -237,5 +237,43 @@ class GrizzlyBerTest < Minitest::Test
   def test_invalid_cardholder_name_doesnt_crash
     tlv = GrizzlyBer.new "5F200CE789A9E79086E695B8E5ADB89F0607A0000000041010"
     tlv.to_s
+  end
+
+  def test_pad_between_tags
+    tlv = GrizzlyBer.new("5A01AA570155")
+    refute_nil tlv.from_ber_hex_string("9F1E01AA00009F1D0155")
+    refute_nil tlv.from_ber_hex_string("9F1C01A1FFFF9F1B0151")
+    assert_equal 6, tlv.size
+    refute_nil tlv["5A"]
+    refute_nil tlv["57"]
+    refute_nil tlv["9F1E"]
+    refute_nil tlv["9F1D"]
+    refute_nil tlv["9F1C"]
+    refute_nil tlv["9F1B"]
+    assert_equal [0xAA], tlv["5A"]
+    assert_equal [0x55], tlv["57"]
+    assert_equal [0xAA], tlv["9F1E"]
+    assert_equal [0x55], tlv["9F1D"]
+    assert_equal [0xA1], tlv["9F1C"]
+    assert_equal [0x51], tlv["9F1B"]
+  end
+
+  def test_pad_after_tags
+    tlv = GrizzlyBer.new("5A01AA570155")
+    refute_nil tlv.from_ber_hex_string("9F1E01AA9F1D01550000")
+    refute_nil tlv.from_ber_hex_string("9F1C01A19F1B0151FFFF")
+    assert_equal 6, tlv.size
+    refute_nil tlv["5A"]
+    refute_nil tlv["57"]
+    refute_nil tlv["9F1E"]
+    refute_nil tlv["9F1D"]
+    refute_nil tlv["9F1C"]
+    refute_nil tlv["9F1B"]
+    assert_equal [0xAA], tlv["5A"]
+    assert_equal [0x55], tlv["57"]
+    assert_equal [0xAA], tlv["9F1E"]
+    assert_equal [0x55], tlv["9F1D"]
+    assert_equal [0xA1], tlv["9F1C"]
+    assert_equal [0x51], tlv["9F1B"]
   end
 end
