@@ -118,8 +118,7 @@ class GrizzlyBer
     raise ArgumentError, "byte_array must be an array of bytes" unless byte_array.is_a? Array and byte_array.all? {|byte| byte.is_a? Integer and byte <= 0xFF}
     while byte_array.size > 0
       element = GrizzlyBerElement.new(byte_array)
-      return nil if element.tag.nil?
-      return nil if element.value.nil?
+      break if element.tag.nil? or element.value.nil?
       @elements << element
     end
     self
