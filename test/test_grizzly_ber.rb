@@ -215,12 +215,19 @@ class GrizzlyBerTest < Minitest::Test
     assert_equal [0x55], tlv["57"]
   end
 
-  def test_null_tags_are_bad
+  def test_bad_tags_are_bad
     tlv = GrizzlyBer.new
     assert_raises ArgumentError do
       tlv["FFFF"] = [5]
+    end
+    assert_raises ArgumentError do
       tlv["1F808080"] = [0]
+    end
+    assert_raises ArgumentError do 
       tlv["0100"] = [0]
+    end
+    assert_raises ArgumentError do
+      tlv["FF"] = [0]
     end
 
     #these tags are valid so won't raise errors
