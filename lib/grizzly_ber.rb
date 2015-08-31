@@ -45,7 +45,8 @@ class GrizzlyBerElement
     return false if tag_byte_array.size < 1
 
     first_byte = tag_byte_array.shift
-    return false if tag_byte_array.size > 0 and (first_byte & 0x1F) != 0x1F 
+    return false if tag_byte_array.size == 0 and (first_byte & 0x1F) == 0x1F
+    return false if tag_byte_array.size > 0  and (first_byte & 0x1F) != 0x1F
 
     last_byte = tag_byte_array.pop || 0x00
     return false if (last_byte & 0x80) != 0x00
