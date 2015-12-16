@@ -60,7 +60,6 @@ class GrizzlyBerElement
   end
 
   def decode_tag(byte_array)
-    byte_array.shift while byte_array.size > 0 and (byte_array[0] == 0x00 or byte_array[0] == 0xFF)
     return [] if byte_array.size < 1
 
     first_byte = byte_array.shift
@@ -104,9 +103,13 @@ end
 class GrizzlyBer
   include Enumerable
 
-  def initialize(hex_string = "")
+  class ParsingError < StandardError
+  end
+
+  def initialize(hex_string = "", allow_FF_tags: false)
     raise ArgumentError, "hex_string must be a valid hex string" unless hex_string.is_a? String and hex_string.size.even? and hex_string =~ /^[0-9A-F]*$/
     @elements = [] # is an array of GrizzlyBerElement
+    @allow_FF_tags = allow_FF_tags
     from_ber_hex_string(hex_string)
   end
 
@@ -117,11 +120,14 @@ class GrizzlyBer
 
   def from_ber(byte_array)
     raise ArgumentError, "byte_array must be an array of bytes" unless byte_array.is_a? Array and byte_array.all? {|byte| byte.is_a? Integer and byte <= 0xFF}
-    while byte_array.size > 0
+    while byte_array.any?
+      byte_array.shift while byte_array.any? && is_erasure_byte(byte_array[0])
+      break if byte_array.empty?
       element = GrizzlyBerElement.new(byte_array)
-      break if element.tag.nil? or element.value.nil?
+      raise ParsingError if element.tag.nil? or element.value.nil?
       @elements << element
     end
+    raise ParsingError if byte_array.any?
     self
   end
 
@@ -201,5 +207,8 @@ class GrizzlyBer
 
   private
 
+  def is_erasure_byte(byte)
+    byte == 0x00 || (!@allow_FF_tags && byte == 0xFF)
+  end
 
 end
