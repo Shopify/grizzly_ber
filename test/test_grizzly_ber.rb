@@ -37,15 +37,15 @@ class GrizzlyBerTest < Minitest::Test
   end
 
   def test_decode_min_length
-    tlv = GrizzlyBer.new("5A015AFFFF")
+    tlv = GrizzlyBer.new("5A015A")
     assert_equal [0x5A], tlv["5A"]
   end
   def test_decode_2byte_length
-    tlv = GrizzlyBer.new("5A81015AFFFF")
+    tlv = GrizzlyBer.new("5A81015A")
     assert_equal [0x5A], tlv["5A"]
   end
   def test_decode_3byte_length
-    tlv = GrizzlyBer.new("5A8200015AFF")
+    tlv = GrizzlyBer.new("5A8200015A")
     assert_equal [0x5A], tlv["5A"]
   end
 
@@ -134,12 +134,15 @@ class GrizzlyBerTest < Minitest::Test
   end
 
   def test_decode_corrupt_length
-    tlv = GrizzlyBer.new("5A825A")
-    assert_equal 0, tlv.size
-    tlv = GrizzlyBer.new("5A815A")
-    assert_equal 0, tlv.size
-    tlv = GrizzlyBer.new("5A025A")
-    assert_equal 0, tlv.size
+    assert_raises GrizzlyBer::ParsingError do
+      GrizzlyBer.new("5A825A")
+    end
+    assert_raises GrizzlyBer::ParsingError do
+      GrizzlyBer.new("5A815A")
+    end
+    assert_raises GrizzlyBer::ParsingError do
+      GrizzlyBer.new("5A025A")
+    end
   end
 
   def test_discard_leading_scratch_bytes
@@ -251,12 +254,6 @@ class GrizzlyBerTest < Minitest::Test
     refute_nil tlv.from_ber_hex_string("9F1E01AA00009F1D0155")
     refute_nil tlv.from_ber_hex_string("9F1C01A1FFFF9F1B0151")
     assert_equal 6, tlv.size
-    refute_nil tlv["5A"]
-    refute_nil tlv["57"]
-    refute_nil tlv["9F1E"]
-    refute_nil tlv["9F1D"]
-    refute_nil tlv["9F1C"]
-    refute_nil tlv["9F1B"]
     assert_equal [0xAA], tlv["5A"]
     assert_equal [0x55], tlv["57"]
     assert_equal [0xAA], tlv["9F1E"]
@@ -282,5 +279,16 @@ class GrizzlyBerTest < Minitest::Test
     assert_equal [0x55], tlv["9F1D"]
     assert_equal [0xA1], tlv["9F1C"]
     assert_equal [0x51], tlv["9F1B"]
+  end
+
+  def test_decoding_garbage
+    assert_raises GrizzlyBer::ParsingError do
+      GrizzlyBer.new("F9D8711C60EB0E1D25EA")
+    end
+  end
+
+  def test_tags_with_FFs
+    tlv = GrizzlyBer.new("FF0E035A01AA", allow_FF_tags: true)
+    assert_equal [0xAA], tlv["FF0E"]["5A"]
   end
 end
