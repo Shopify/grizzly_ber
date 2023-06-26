@@ -3,10 +3,11 @@ require 'grizzly_tag'
 class GrizzlyBerElement
   attr_reader :tag, :value
 
-  def initialize(byte_array = [])
+  def initialize(byte_array = [], ignore_nested: false)
     raise ArgumentError, "byte_array must be of type Array" unless byte_array.is_a?(Array)
     @tag = "" # is an uppercase hex string
     @value = nil # is a byte array if this is a data element or a GrizzlyBer if it's a sequence element
+    @ignore_nested = ignore_nested # do not parse nested tags
     decode_value decode_length decode_tag byte_array
   end
 
@@ -95,7 +96,7 @@ class GrizzlyBerElement
 
   def decode_value(byte_array)
     return [] if byte_array.size < 1 or byte_array.size < @length
-    return @value = byte_array.shift(@length) if [@tag].pack("H*").unpack("C*").first & 0x20 == 0
+    return @value = byte_array.shift(@length) if @ignore_nested || [@tag].pack("H*").unpack("C*").first & 0x20 == 0
     @value = GrizzlyBer.new.from_ber byte_array.shift(@length)
   end
 end
@@ -106,10 +107,11 @@ class GrizzlyBer
   class ParsingError < StandardError
   end
 
-  def initialize(hex_string = "", allow_FF_tags: false)
+  def initialize(hex_string = "", allow_FF_tags: false, ignore_nested: false)
     raise ArgumentError, "hex_string must be a valid hex string" unless hex_string.is_a? String and hex_string.size.even? and hex_string =~ /^[0-9A-F]*$/
     @elements = [] # is an array of GrizzlyBerElement
     @allow_FF_tags = allow_FF_tags
+    @ignore_nested = ignore_nested
     from_ber_hex_string(hex_string)
   end
 
@@ -123,7 +125,7 @@ class GrizzlyBer
     while byte_array.any?
       byte_array.shift while byte_array.any? && is_erasure_byte(byte_array[0])
       break if byte_array.empty?
-      element = GrizzlyBerElement.new(byte_array)
+      element = GrizzlyBerElement.new(byte_array, ignore_nested: @ignore_nested)
       raise ParsingError if element.tag.nil? or element.value.nil?
       @elements << element
     end
