@@ -15,5 +15,7 @@ Gem::Specification.new do |s|
   s.metadata["homepage_uri"] = s.homepage
   s.metadata["source_code_uri"] = s.homepage
 
+  s.required_ruby_version = ">= 3.1.0"
+
   s.require_paths = ["lib"]
 end
