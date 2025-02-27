@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module GrizzlyTag
   def self.new_tag(params)
     params[:format] ||= :binary
