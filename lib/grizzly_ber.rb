@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'grizzly_tag'
 
 class GrizzlyBerElement
@@ -5,7 +7,7 @@ class GrizzlyBerElement
 
   def initialize(byte_array = [])
     raise ArgumentError, "byte_array must be of type Array" unless byte_array.is_a?(Array)
-    @tag = "" # is an uppercase hex string
+    @tag = +"" # is an uppercase hex string
     @value = nil # is a byte array if this is a data element or a GrizzlyBer if it's a sequence element
     decode_value decode_length decode_tag byte_array
   end
