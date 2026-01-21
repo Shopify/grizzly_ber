@@ -291,4 +291,12 @@ class GrizzlyBerTest < Minitest::Test
     tlv = GrizzlyBer.new("FF0E035A01AA", allow_FF_tags: true)
     assert_equal [0xAA], tlv["FF0E"]["5A"]
   end
+
+  def test_decoding_response
+    tlv = GrizzlyBer.new("8A023030910815BDF04000820000721F86158424000210202020202020202020202020202020202020202020202020",
+                         ignore_nested: true)
+    assert_equal 2, tlv["8A"].size
+    assert_equal 8, tlv["91"].size
+    assert_equal 31, tlv["72"].size
+  end
 end
